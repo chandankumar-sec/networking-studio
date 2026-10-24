@@ -242,3 +242,43 @@ body.paused *{animation-play-state:paused!important;animation:none!important;tra
   h1.title{font-size:32px}
   .topbtn span.lab{display:none}
 }
+
+/* ---------- v2 additions: locks, quiz, notes, journal, flashcards ---------- */
+.mod.locked,.steplist .step.locked,.modcard.locked{opacity:.5}
+.steplist .step.locked{cursor:not-allowed}
+.steplist .step.special .n{color:var(--amber)}
+.steplist .step.special.done .n{color:var(--green)}
+.tick.lock{font-size:11px}
+.q .opt.picked{border-color:var(--red);background:var(--redbg)}
+.recap{border:1px solid var(--redline);background:var(--redbg);border-radius:10px;padding:14px 18px;margin:20px 0 6px}
+.recap ul{margin:8px 0 0;padding-left:20px}
+.recap li{margin:4px 0;color:#e8d5d7}
+textarea.notes{width:100%;resize:vertical;line-height:1.55;font-family:var(--font)}
+.tasks{display:grid;gap:8px;margin:8px 0 14px}
+.task{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px 12px}
+.task input{margin-top:4px;accent-color:var(--red2);width:16px;height:16px}
+.flash{display:block;width:100%;min-height:200px;border:1px solid var(--line2);border-radius:14px;background:var(--panel);font-size:24px;font-weight:700;padding:30px;text-align:center;line-height:1.35}
+.flash small{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.flash.back{font-size:18px;font-weight:500;border-color:var(--red);background:var(--redbg)}
+.jcard{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:16px 20px;margin:12px 0}
+.jcard ul{margin:8px 0;padding-left:20px}
+.jcard blockquote{margin:10px 0 0;padding:8px 14px;border-left:3px solid var(--red);background:var(--bg2);white-space:pre-wrap;color:#cfcfd6}
+.jterms{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.jt{border:1px solid var(--line2);border-radius:8px;padding:3px 10px;font-size:12.5px;color:#b9b9c2}
+.jt b{color:#fff}
+.stats{grid-template-columns:repeat(4,1fr)}
+.chartline{stroke:var(--red);fill:none;stroke-width:2.5}
+.chartaxis{stroke:#3a3a44;stroke-width:1}
+.chartlab{fill:#8c8c97;font-size:11px;font-family:var(--font)}
+.rangeline{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+input[type=range]{accent-color:#e5383b}
+@media print{
+  body{background:#fff;color:#000}
+  #side,.topbar,.noprint,#toast{display:none!important}
+  #app{display:block;height:auto}
+  #main,#scroll{height:auto;overflow:visible}
+  .page{max-width:none;padding:0}
+  .jcard{background:#fff;border-color:#bbb;color:#000;break-inside:avoid}
+  .jcard blockquote{background:#f3f3f3;color:#000}
+  h1,h2,h3,b{color:#000}.muted,.eyebrow{color:#555}
+}

@@ -1,70 +1,84 @@
 # Networking Studio (90 Day)
 
-Ek interactive networking course jo poora browser mein chalta hai. Koi server, database ya build step nahi hai. Content simple Hinglish mein hai aur security ki nazar se likha gaya hai.
+An interactive networking course that runs fully in your browser. No server, no database, no build step. Everything is written in simple English with a security focus.
 
-## Kya milta hai
+## What you get
 
-- **6 modules, 54 lessons:** Foundations, Addressing, Core Protocols, Devices and Routing, Hands-on Tools, Security.
-- **90-day plan:** har din ka ek chhota kaam, tick karne wala tracker, aur "aaj Day kaun sa hai" ka hisaab.
-- **13 interactive tools:** home network, packet sequence animator, subnet calculator aur practice, encapsulation, routing lookup, topology builder (ping ke saath), firewall tester, Wireshark jaisa capture reader, nmap aur ping/traceroute simulator, HTTP builder, port game.
-- **Har lesson mein:** diagram ya tool, simple explanation, terms, common doubts, aur quick quiz.
-- **Progress** browser ke `localStorage` mein save hota hai (is device par).
-- Shortcuts: `/` search, `F` focus view, `←` `→` pichla ya agla step. "Pause motion" animations rok deta hai.
+- **6 modules, 78 lessons:** Foundations, Models and Addressing, Core Protocols, Devices and Routing, Hands-on Tools, Security.
+- **Lessons unlock one by one.** You must pass a short quiz (60%) to open the next lesson. Each module ends with a final exam (70%) and two assignments, and the next module opens only after you finish them.
+- **234 quiz questions** with explanations. Options are shuffled on every try.
+- **12 assignments** with task checklists and a written answer. They are saved in your browser (no server) and go into your journal.
+- **My notes** on every lesson, **key takeaways** at the end of each lesson, and **flashcards** (spaced repetition) built from the terms of lessons you finished.
+- **My journal:** a single page with your takeaways, terms, notes, quiz scores and assignment answers. Download it as Markdown, copy it, or print it to PDF to share how you learned.
+- **90-day plan** with a daily task and a tick-box tracker, plus a dashboard (streak, average quiz score, exams, weak spots).
+- **19 interactive tools** (never locked): home network, packet sequences, subnet calculator and practice, VLSM planner, routing lookup, OSPF shortest path, topology builder, firewall tester, packet capture reader, filter challenges, TCP congestion, bandwidth calculator, HTTP builder, ping/traceroute and nmap simulators, and more.
+- Shortcuts: `/` search, `F` focus view, `←` `→` previous/next lesson. "Pause motion" stops animations.
+- **Open mode** (Settings on the overview page) unlocks every lesson. Useful for revisiting the course or showing it to someone.
 
-## Local chalana
+## Run it locally
 
-Seedha `index.html` double-click karo, ya ek chhota server chalao (behtar):
+Open `index.html`, or (better) start a tiny server:
 
 ```bash
 python -m http.server 5173
 ```
 
-phir `http://localhost:5173` kholo.
+then open `http://localhost:5173`.
 
-## GitHub Pages par deploy karna
+## Deploy to GitHub Pages
 
-1. GitHub par naya repository banao (jaise `networking-studio`).
-2. Is folder ki saari files us repository mein push karo:
+1. Create a repository on GitHub (for example `networking-studio`).
+2. Push this folder:
 
 ```bash
 git init
 git add .
 git commit -m "Networking Studio"
 git branch -M main
-git remote add origin https://github.com/<tumhara-username>/networking-studio.git
+git remote add origin https://github.com/YOUR-USERNAME/networking-studio.git
 git push -u origin main
 ```
 
-3. Repository mein **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: main / (root)** chuno aur Save karo.
-4. 1-2 minute baad site `https://<tumhara-username>.github.io/networking-studio/` par live hogi.
+3. In the repository open **Settings → Pages → Build and deployment**. Choose **Deploy from a branch**, branch **main**, folder **/ (root)**, and save.
+4. After a minute or two your site is live at `https://YOUR-USERNAME.github.io/networking-studio/`.
 
-Netlify ya Vercel par bhi folder drag-drop karke deploy ho jata hai (build command khaali chhodo).
+To update later: `git add .`, `git commit -m "change"`, `git push`.
+
+Your progress is stored in each browser's `localStorage`, so it is private to that device and browser.
 
 ## Tests
 
-Network logic (subnetting, routing match, firewall, path finding) ke tests:
-
 ```bash
-node tests/netlib.test.js
+node tests/netlib.test.js     # subnetting, routing match, firewall, path finding
+node tests/content.test.js    # checks every lesson, quiz, assignment and plan link
 ```
 
-## Structure
+## Project structure
 
 ```
-index.html            entry page
-css/style.css         dark + red theme
-js/netlib.js          pure networking functions (browser + Node)
-js/core.js            state, router, sidebar, search
-js/pages.js           overview, plan, chapters, tool lab, lesson page
-js/widgets/basic.js   home, sequence, cards, table, bits, subnet, encapsulation, routing
-js/widgets/labs.js    topology, firewall, capture, nmap/ping sims, HTTP, decision, port game
-js/data/              curriculum (3 files), 90-day plan, tool list
+index.html              entry page
+css/style.css           dark and red theme
+js/netlib.js            pure networking functions (browser + Node)
+js/core.js              state, unlock rules, router, sidebar, search
+js/quiz.js              quiz runner (lesson quizzes and exams)
+js/pages.js             overview, plan, chapters, tool lab, lesson page
+js/pages2.js            final exam, assignments, flashcards, journal
+js/widgets/             interactive tools: basic.js, labs.js, adv.js
+js/data/                m1..m6 module lessons, assignments.js, plan.js, tools.js
+tests/                  Node tests
 ```
 
-## Naya lesson jodna
+## Add a lesson
 
-`js/data/curriculum*.js` mein kisi module ke `steps` mein ek `S(...)` entry jodo. Widget type ke options: `home`, `seq`, `cards`, `table`, `bits`, `subnet`, `subnetquiz`, `encap`, `route`, `topo`, `firewall`, `capture`, `pingtrace`, `nmapsim`, `http`, `decision`, `portgame`.
+In a module file under `js/data/`, add an entry to `steps` using the helper:
 
-## Zimmedaari
+```js
+S(id, title, subtitle, { type: 'subnet' }, [explanation paragraphs], [key takeaways],
+  [[term, definition]], [[question, answer]], [{ q, o: [options], a: correctIndex, why }], 'search keywords')
+```
 
-Saare scan aur attack wale tools **simulation** hain, fictional hosts par. Asli nmap, Wireshark ya koi bhi test sirf apne network ya likhit permission wali lab mein karo.
+Give each lesson at least 3 quiz questions (the content test enforces this). Widget types: `home`, `seq`, `cards`, `table`, `bits`, `subnet`, `subnetquiz`, `vlsm`, `encap`, `route`, `ospf`, `topo`, `firewall`, `capture`, `capchallenge`, `tcpwin`, `bandwidth`, `pingtrace`, `nmapsim`, `http`, `decision`, `portgame`.
+
+## Responsible use
+
+All scan and attack tools here are **simulations on fictional hosts**. Only run real tools such as nmap or Wireshark on your own network, or where you have written permission.

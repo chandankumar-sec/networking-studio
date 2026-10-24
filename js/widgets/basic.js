@@ -1,17 +1,15 @@
 /* Widgets part 1: home network, sequence animator, cards, table, bits, subnet tools, encapsulation, routing. */
 (function () {
   'use strict';
-  const { h, svg, register, state } = Studio;
+  const { h, svg, register } = Studio;
   const N = window.NetLib;
 
   function chips(list, current, onPick) {
     const wrap = h('div', { class: 'chips' });
-    list.forEach(([id, label]) => {
-      const b = h('button', { class: 'chip' + (id === current ? ' on' : ''), onclick: () => onPick(id) }, label);
-      wrap.append(b);
-    });
+    list.forEach(([id, label]) => wrap.append(h('button', { class: 'chip' + (id === current ? ' on' : ''), onclick: () => onPick(id) }, label)));
     return wrap;
   }
+  Studio.chips = chips;
 
   /* ---------- 1. everyday home network ---------- */
   register('home', function (root) {
@@ -47,21 +45,16 @@
         svg('text', { class: 'zonelab', x: 44, y: 48 }, 'YOUR HOME NETWORK'),
         svg('rect', { class: 'zone', x: 700, y: 20, width: 180, height: 360, rx: 14 }),
         svg('text', { class: 'zonelab', x: 724, y: 48 }, 'OUTSIDE YOUR HOME'));
-      // links
       Object.keys(devices).forEach(k => {
         const v = devices[k];
-        const isSel = k === dev;
         const down = v.link === 'wifi' && sc === 'wifioff';
         let cls = v.link === 'wifi' ? 'wireless' : 'wire';
-        if (down) cls += ' cut';
-        else if (isSel) cls += ' hot flow';
+        if (down) cls += ' cut'; else if (k === dev) cls += ' hot flow';
         s.append(svg('line', { class: cls, x1: v.x, y1: v.y, x2: R.x, y2: R.y }));
       });
-      const upCls = sc === 'cable' ? 'wire cut' : (internet ? 'wire hot flow' : 'wire');
-      s.append(svg('line', { class: upCls, x1: R.x, y1: R.y, x2: 790, y2: 130 }));
+      s.append(svg('line', { class: sc === 'cable' ? 'wire cut' : (internet ? 'wire hot flow' : 'wire'), x1: R.x, y1: R.y, x2: 790, y2: 130 }));
       s.append(svg('line', { class: internet ? 'wire hot flow' : 'wire cut', x1: 790, y1: 175, x2: 790, y2: 270 }));
       if (sc === 'cable') s.append(svg('text', { x: 620, y: 150, fill: '#ff4d5a', 'font-size': 26, 'font-weight': 700 }, '✕'));
-      // nodes
       const node = (x, y, icon, name, sub, cls) => {
         const g = svg('g', { class: 'node ' + (cls || '') });
         g.append(svg('rect', { x: x - 70, y: y - 42, width: 140, height: 84, rx: 10 }),
@@ -85,20 +78,20 @@
         h('span', null, svg('svg', { viewBox: '0 0 34 8' }, svg('line', { class: 'wireless', x1: 0, y1: 4, x2: 34, y2: 4 })), 'Wireless link')));
       const line = (ok, text) => h('div', null, ok ? '✅ ' : '❌ ', text);
       const bad = !internet || !local;
-      let verdict = d.name + (wifi ? ' Wi-Fi se' : ' cable se') + ' connected hai.';
-      if (!linkUp) verdict = d.name + ' ka Wi-Fi band hai, to wo kisi se baat nahi kar sakta.';
+      let verdict = d.name + (wifi ? ' is connected by Wi-Fi.' : ' is connected by cable.');
+      if (!linkUp) verdict = d.name + ' has no Wi-Fi, so it cannot talk to anything.';
       host.append(h('div', { class: 'status ' + (bad ? 'bad' : 'ok') },
         h('b', null, 'Result: '), verdict,
-        line(linkUp, 'Wi-Fi box tak pahunch raha hai'),
-        line(internet, 'Internet / website tak pahunch raha hai'),
-        line(local, 'Ghar ke baaki devices (printer, laptop) tak pahunch raha hai')));
+        line(linkUp, 'Can reach the Wi-Fi box'),
+        line(internet, 'Can reach the internet and websites'),
+        line(local, 'Can reach other home devices (printer, laptop)')));
       const why = {
-        ok: 'Sab kuch sahi hai: ek hi chhota network, aur wahi Wi-Fi box internet ka darwaza hai.',
-        cable: 'Cable nikalte hi ghar ke devices aapas mein baat kar sakte hain (printer chalega), par internet gaya. Dhyan do: local network aur internet alag cheezein hain.',
-        wifioff: 'Wi-Fi band hone par sirf wireless devices kat jaate hain. Cable wale laptop aur printer ko farak nahi padta.',
-        guest: 'Guest isolation guest devices ko internet deta hai, par ghar ke devices se door rakhta hai. Security ke liye bahut kaam ka feature.'
+        ok: 'Everything works. One small network, and the Wi-Fi box is the door to the internet.',
+        cable: 'With the cable out, home devices can still talk to each other (the printer still works) but the internet is gone. Remember: the local network and the internet are two different things.',
+        wifioff: 'Turning Wi-Fi off only cuts the wireless devices. The laptop and printer use cables, so they are fine.',
+        guest: 'Guest isolation gives guest devices internet but hides your home devices from them. It is a very useful security feature.'
       };
-      host.append(h('div', { class: 'note' }, why[sc] + ' Real ghar mein Wi-Fi box asal mein router + switch + access point ka combo hota hai, jo ek hi dabbe mein aata hai.'));
+      host.append(h('div', { class: 'note' }, why[sc] + ' In a real home the "Wi-Fi box" is usually a router, a switch and an access point in one device.'));
     }
     draw();
   });
@@ -111,7 +104,7 @@
     const xs = actors.map((_, k) => 110 + k * ((W - 220) / Math.max(1, actors.length - 1)));
     const box = h('div', { class: 'widget seq' });
     const svgHost = h('div'), logHost = h('div', { class: 'seqlog' }), ctrl = h('div', { class: 'row', style: { margin: '12px 0' } });
-    box.append(h('div', { class: 'wtitle' }, h('span', null, cfg.title || 'Step by step'), h('span', null, 'Next dabao ya Play')), ctrl, svgHost, logHost);
+    box.append(h('div', { class: 'wtitle' }, h('span', null, cfg.title || 'Step by step'), h('span', null, 'Press Next or Play')), ctrl, svgHost, logHost);
     root.append(box);
 
     function draw() {
@@ -145,17 +138,17 @@
         logHost.append(h('div', { class: 'seqmsg ' + (k === i ? 'on' : 'past') },
           h('b', null, (k + 1) + '. ' + actors[m.f] + (m.f === m.t ? '' : ' → ' + actors[m.t]) + ': '), m.detail));
       });
-      if (i < 0) logHost.append(h('div', { class: 'seqmsg' }, 'Abhi kuch nahi hua. "Next" dabao aur dekho pehle kya hota hai.'));
+      if (i < 0) logHost.append(h('div', { class: 'seqmsg' }, 'Nothing has happened yet. Press "Next" and watch what happens first.'));
     }
     function stop() { clearInterval(timer); timer = null; drawCtrl(); }
     function step(d) { i = Math.max(-1, Math.min(msgs.length - 1, i + d)); draw(); drawCtrl(); }
     function play() {
-      if (Studio.paused()) { Studio.toast('Motion paused hai. Next se step karo.'); return; }
+      if (Studio.paused()) { Studio.toast('Motion is paused. Use Next to step through.'); return; }
       if (i >= msgs.length - 1) i = -1;
       timer = setInterval(() => {
         if (!box.isConnected || i >= msgs.length - 1) { stop(); return; }
         step(1);
-      }, 1500);
+      }, 1700);
       step(1);
     }
     function drawCtrl() {
@@ -172,7 +165,7 @@
 
   /* ---------- 3. reveal cards ---------- */
   register('cards', function (root, cfg) {
-    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, cfg.title || 'Click karke kholo')));
+    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, cfg.title || 'Click to open')));
     const g = h('div', { class: 'cardsgrid' });
     (cfg.items || []).forEach(it => {
       const c = h('button', { class: 'rcard', 'aria-expanded': 'false', onclick: () => { const o = c.classList.toggle('open'); c.setAttribute('aria-expanded', o); } },
@@ -185,28 +178,28 @@
   /* ---------- 4. filterable table ---------- */
   register('table', function (root, cfg) {
     const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, cfg.title || '')));
-    const inp = h('input', { class: 'in', placeholder: cfg.placeholder || 'Filter karo...', style: { marginBottom: '10px', width: '100%' } });
+    const inp = h('input', { class: 'in', placeholder: cfg.placeholder || 'Filter...', style: { marginBottom: '10px', width: '100%' } });
     const t = h('table', { class: 't' }, h('thead', null, h('tr', null, cfg.cols.map(c => h('th', null, c)))));
     const tb = h('tbody'); t.append(tb);
     function draw() {
       const q = inp.value.toLowerCase();
       tb.innerHTML = '';
       cfg.rows.forEach(r => { if (!q || r.join(' ').toLowerCase().includes(q)) tb.append(h('tr', null, r.map((c, k) => h('td', { class: k === 0 ? 'mono' : '', html: String(c) })))); });
-      if (!tb.children.length) tb.append(h('tr', null, h('td', { colspan: cfg.cols.length, class: 'muted' }, 'Kuch match nahi hua.')));
+      if (!tb.children.length) tb.append(h('tr', null, h('td', { colspan: cfg.cols.length, class: 'muted' }, 'No match.')));
     }
     inp.addEventListener('input', draw);
     if (cfg.filter !== false) box.append(inp);
-    box.append(t); root.append(box); draw();
+    box.append(h('div', { style: { overflowX: 'auto' } }, t)); root.append(box); draw();
   });
 
   /* ---------- 5. binary / IP bits ---------- */
   register('bits', function (root) {
     const oct = [192, 168, 1, 10];
-    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'IP address ke bits'), h('span', null, 'Bit pe click karke 0/1 badlo')));
+    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'The bits of an IP address'), h('span', null, 'Click a bit to flip it')));
     const row = h('div', { class: 'grid3', style: { gridTemplateColumns: 'repeat(4,1fr)' } });
     const out = h('div', { class: 'status' });
     const inp = h('input', { class: 'in', value: '192.168.1.10', style: { width: '190px' }, 'aria-label': 'IP address' });
-    box.append(h('div', { class: 'row', style: { marginBottom: '12px' } }, h('label', { class: 'lb', style: { margin: 0 } }, 'Ya seedha IP likho:'), inp), row, out);
+    box.append(h('div', { class: 'row', style: { marginBottom: '12px' } }, h('label', { class: 'lb', style: { margin: 0 } }, 'Or type an IP:'), inp), row, out);
     root.append(box);
     inp.addEventListener('input', () => { const v = N.ip2int(inp.value); if (v !== null) { for (let k = 0; k < 4; k++) oct[k] = (v >>> (24 - 8 * k)) & 255; draw(false); } });
     function draw(syncInput) {
@@ -231,9 +224,9 @@
 
   /* ---------- 6. subnet calculator ---------- */
   register('subnet', function (root, cfg) {
-    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'Subnet calculator'), h('span', null, 'CIDR ya mask dono chalte hain')));
+    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'Subnet calculator'), h('span', null, 'CIDR or mask both work')));
     const inp = h('input', { class: 'in', value: (cfg && cfg.start) || '192.168.1.130/26', style: { width: '230px' }, 'aria-label': 'IP/CIDR' });
-    const slider = h('input', { type: 'range', min: 0, max: 32, value: 26, 'aria-label': 'prefix length', style: { accentColor: '#e5383b', width: '220px' } });
+    const slider = h('input', { type: 'range', min: 0, max: 32, value: 26, 'aria-label': 'prefix length', style: { width: '220px' } });
     const out = h('div'); const split = h('div');
     box.append(h('div', { class: 'row' }, h('div', null, h('label', { class: 'lb' }, 'IP/prefix (192.168.1.130/26)'), inp), h('div', null, h('label', { class: 'lb' }, 'Prefix slider'), slider)), out, split);
     root.append(box);
@@ -241,12 +234,10 @@
     function draw() {
       out.innerHTML = split.innerHTML = '';
       const c = parse();
-      if (!c) { out.append(h('div', { class: 'status bad' }, 'Format galat hai. Aise likho: 192.168.1.10/24')); return; }
+      if (!c) { out.append(h('div', { class: 'status bad' }, 'That format is not valid. Write it like 192.168.1.10/24')); return; }
       slider.value = c.prefix;
       const s = N.subnetInfo(c.ip, c.prefix);
       const bin = N.toBin(c.ip, 32);
-      const colored = h('div', { class: 'nbits', style: { margin: '14px 0' } },
-        h('span', { class: 'net' }, bin.slice(0, c.prefix)), h('span', { class: 'host' }, bin.slice(c.prefix)));
       const dotted = [0, 8, 16, 24].map(k => bin.slice(k, k + 8));
       const pretty = h('div', { class: 'nbits', style: { margin: '14px 0', fontSize: '15px' } });
       let pos = 0;
@@ -269,7 +260,7 @@
         const np = Math.min(32, c.prefix + 2);
         const sel = h('select', { class: 'in' });
         for (let p = c.prefix + 1; p <= Math.min(30, c.prefix + 6); p++) sel.append(h('option', { value: p, selected: p === np ? true : null }, '/' + p + ' (' + Math.pow(2, p - c.prefix) + ' subnets)'));
-        const tableHost = h('div');
+        const tableHost = h('div', { style: { overflowX: 'auto' } });
         const drawSplit = () => {
           tableHost.innerHTML = '';
           const list = N.splitNetwork(s.network, c.prefix, Number(sel.value));
@@ -278,7 +269,7 @@
           tableHost.append(t);
         };
         sel.addEventListener('change', drawSplit);
-        split.append(h('h3', null, 'Is network ko chhote subnets mein todo'), sel, h('div', { style: { height: '8px' } }), tableHost);
+        split.append(h('h3', null, 'Split this network into smaller subnets'), sel, h('div', { style: { height: '8px' } }), tableHost);
         drawSplit();
       }
     }
@@ -300,10 +291,10 @@
       const prefix = rnd(16, 29);
       const ip = N.int2ip(((rnd(10, 200) << 24) | (rnd(0, 255) << 16) | (rnd(0, 255) << 8) | rnd(1, 254)) >>> 0);
       const info = N.subnetInfo(N.ip2int(ip), prefix);
-      if (kind === 0) return { q: `/${prefix} mein kitne usable hosts hote hain?`, a: String(info.hosts), h: `2^(32-${prefix}) - 2 = ${info.total} - 2 = ${info.hosts}` };
-      if (kind === 1) return { q: `${ip}/${prefix} ka network address kya hai?`, a: N.int2ip(info.network), h: `IP ko mask ${N.int2ip(info.mask)} ke saath AND karo.` };
-      if (kind === 2) return { q: `${ip}/${prefix} ka broadcast address kya hai?`, a: N.int2ip(info.broadcast), h: `Network ${N.int2ip(info.network)} ke saare host bits 1 kar do.` };
-      return { q: `/${prefix} ka subnet mask dotted form mein kya hoga?`, a: N.int2ip(info.mask), h: `${prefix} ones, phir zeros. Octet-by-octet likho.` };
+      if (kind === 0) return { q: `How many usable hosts are in a /${prefix}?`, a: String(info.hosts), h: `2^(32-${prefix}) - 2 = ${info.total} - 2 = ${info.hosts}` };
+      if (kind === 1) return { q: `What is the network address of ${ip}/${prefix}?`, a: N.int2ip(info.network), h: `AND the IP with the mask ${N.int2ip(info.mask)}.` };
+      if (kind === 2) return { q: `What is the broadcast address of ${ip}/${prefix}?`, a: N.int2ip(info.broadcast), h: `Take the network ${N.int2ip(info.network)} and set all host bits to 1.` };
+      return { q: `What is the dotted subnet mask of a /${prefix}?`, a: N.int2ip(info.mask), h: `Write ${prefix} ones, then zeros. Convert octet by octet.` };
     }
     function next() { cur = make(); qEl.textContent = cur.q; inp.value = ''; res.innerHTML = ''; hint.hidden = true; inp.focus(); }
     function check() {
@@ -312,41 +303,39 @@
       const ok = inp.value.trim() === cur.a;
       if (ok) right++;
       res.innerHTML = '';
-      res.append(h('div', { class: 'status ' + (ok ? 'ok' : 'bad') }, ok ? '✅ Sahi!' : '❌ Sahi jawab: ' + cur.a));
+      res.append(h('div', { class: 'status ' + (ok ? 'ok' : 'bad') }, ok ? '✅ Correct!' : '❌ The answer is: ' + cur.a));
       hint.hidden = false; hint.textContent = 'Trick: ' + cur.h;
       box.querySelector('#score').textContent = 'Score ' + right + '/' + tried;
     }
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
-    box.append(qEl, h('div', { class: 'row' }, inp, h('button', { class: 'btn primary', onclick: check }, 'Check'), h('button', { class: 'btn', onclick: next }, 'Naya sawal')), res, hint);
+    box.append(qEl, h('div', { class: 'row' }, inp, h('button', { class: 'btn primary', onclick: check }, 'Check'), h('button', { class: 'btn', onclick: next }, 'New question')), res, hint);
     root.append(box); next();
   });
 
   /* ---------- 8. encapsulation stepper ---------- */
   register('encap', function (root) {
-    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'Message ka safar: layers lagte hain'), h('span', null, 'Encapsulation')));
+    const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'How a message gets wrapped in layers'), h('span', null, 'Encapsulation')));
     const msg = h('input', { class: 'in', value: 'GET /hello', style: { width: '260px' }, 'aria-label': 'message' });
     let step = 0, dir = 'send';
     const stack = h('div'), info = h('div', { class: 'status' }), ctrl = h('div', { class: 'row', style: { margin: '12px 0' } });
-    box.append(h('div', { class: 'row' }, h('div', null, h('label', { class: 'lb' }, 'Apna message likho'), msg)), ctrl, stack, info);
+    box.append(h('div', { class: 'row' }, h('div', null, h('label', { class: 'lb' }, 'Type your message'), msg)), ctrl, stack, info);
     root.append(box);
     const layers = [
-      { n: 'Application data', c: '#5aa9ff', d: () => `"${msg.value}"`, e: 'Ye asli message hai jo app (browser) bhejna chahta hai.' },
-      { n: 'TCP header (Layer 4)', c: '#3ddc97', d: () => 'src port 51514 → dst port 80, seq 1', e: 'Port batata hai kaunsi app ke liye hai (80 = web). Order aur reliability ka kaam bhi yahi karta hai.' },
-      { n: 'IP header (Layer 3)', c: '#ffb454', d: () => '192.168.1.10 → 93.184.216.34, TTL 64', e: 'IP address batata hai kaun se computer ko jana hai. Routers sirf isse dekhte hain.' },
-      { n: 'Ethernet frame (Layer 2)', c: '#ff4d5a', d: () => 'MAC aa:bb:cc:11:22:33 → MAC de:ad:be:ef:00:01', e: 'Agle hop (router) ka MAC address. Ye sirf local network tak chalta hai, har hop pe badal jata hai.' },
-      { n: 'Bits on the wire (Layer 1)', c: '#b794f6', d: () => '0100011101000101...', e: 'Aakhir mein sab kuch bijli ke signal ya Wi-Fi waves mein 0 aur 1 ban jata hai.' },
+      { n: 'Application data', c: '#5aa9ff', d: () => `"${msg.value}"`, e: 'This is the real message the app (your browser) wants to send.' },
+      { n: 'TCP header (Layer 4)', c: '#3ddc97', d: () => 'src port 51514 → dst port 80, seq 1', e: 'The port says which app should receive the data (80 = web). TCP also handles order and reliability.' },
+      { n: 'IP header (Layer 3)', c: '#ffb454', d: () => '192.168.1.10 → 93.184.216.34, TTL 64', e: 'The IP address says which computer should get it. Routers only look at this part.' },
+      { n: 'Ethernet frame (Layer 2)', c: '#ff4d5a', d: () => 'MAC aa:bb:cc:11:22:33 → MAC de:ad:be:ef:00:01', e: 'The MAC address of the next hop (your router). It only works on the local network and changes at every hop.' },
+      { n: 'Bits on the wire (Layer 1)', c: '#b794f6', d: () => '0100011101000101...', e: 'In the end everything becomes 0s and 1s sent as electric signals, light or Wi-Fi waves.' },
     ];
     function draw() {
       ctrl.innerHTML = '';
       ctrl.append(
-        h('button', { class: 'btn sm primary', onclick: () => { step = Math.min(layers.length - 1, step + 1); draw(); }, disabled: step >= layers.length - 1 ? true : null }, dir === 'send' ? 'Agla layer lagao →' : 'Agla layer hatao →'),
-        h('button', { class: 'btn sm', onclick: () => { step = Math.max(0, step - 1); draw(); } }, '← Peeche'),
+        h('button', { class: 'btn sm primary', onclick: () => { step = Math.min(layers.length - 1, step + 1); draw(); }, disabled: step >= layers.length - 1 ? true : null }, dir === 'send' ? 'Add next layer →' : 'Remove next layer →'),
+        h('button', { class: 'btn sm', onclick: () => { step = Math.max(0, step - 1); draw(); } }, '← Back'),
         h('button', { class: 'btn sm', onclick: () => { step = 0; draw(); } }, 'Reset'),
-        h('button', { class: 'btn sm', onclick: () => { dir = dir === 'send' ? 'recv' : 'send'; step = 0; draw(); } }, dir === 'send' ? 'Receiver side dekho' : 'Sender side dekho'));
+        h('button', { class: 'btn sm', onclick: () => { dir = dir === 'send' ? 'recv' : 'send'; step = 0; draw(); } }, dir === 'send' ? 'Show the receiver side' : 'Show the sender side'));
       stack.innerHTML = '';
-      // sender: visible layers = 0..step ; receiver: starts full, removes outer layers
       const visible = dir === 'send' ? step : layers.length - 1 - step;
-      // layers nest: outermost = highest k, so Ethernet wraps IP wraps TCP wraps data
       stack.append(buildNested(Math.min(visible, 3)));
       if (visible >= 4) stack.append(h('div', { class: 'pre', style: { marginTop: '10px', color: '#b794f6' } }, 'Bits: ' + bitsOf(msg.value)));
       const cur = layers[visible];
@@ -373,19 +362,19 @@
   /* ---------- 9. routing table lookup ---------- */
   register('route', function (root) {
     const routes = [
-      { net: '0.0.0.0/0', via: 'ISP gateway 203.0.113.1', note: 'Default route: baaki sab' },
-      { net: '10.0.0.0/8', via: 'Router B', note: 'Office ka bada network' },
+      { net: '0.0.0.0/0', via: 'ISP gateway 203.0.113.1', note: 'Default route: everything else' },
+      { net: '10.0.0.0/8', via: 'Router B', note: 'The big office network' },
       { net: '10.1.0.0/16', via: 'Router C', note: 'Branch office' },
       { net: '10.1.5.0/24', via: 'Router D', note: 'Server room' },
-      { net: '192.168.1.0/24', via: 'Directly connected (eth0)', note: 'Apna LAN' },
+      { net: '192.168.1.0/24', via: 'Directly connected (eth0)', note: 'Local LAN' },
     ];
     const box = h('div', { class: 'widget' }, h('div', { class: 'wtitle' }, h('span', null, 'Routing table lookup'), h('span', null, 'Longest prefix match')));
     const inp = h('input', { class: 'in', value: '10.1.5.20', style: { width: '200px' }, 'aria-label': 'destination IP' });
-    const tbl = h('div'), res = h('div'); const addNet = h('input', { class: 'in', placeholder: '172.16.0.0/12', style: { width: '160px' } }), addVia = h('input', { class: 'in', placeholder: 'Router E', style: { width: '140px' } });
-    box.append(h('div', { class: 'row' }, h('div', null, h('label', { class: 'lb' }, 'Packet ka destination IP'), inp),
+    const tbl = h('div', { style: { overflowX: 'auto' } }), res = h('div'); const addNet = h('input', { class: 'in', placeholder: '172.16.0.0/12', style: { width: '160px' } }), addVia = h('input', { class: 'in', placeholder: 'Router E', style: { width: '140px' } });
+    box.append(h('div', { class: 'row' }, h('div', null, h('label', { class: 'lb' }, 'Destination IP of the packet'), inp),
       h('div', { class: 'row', style: { marginLeft: 'auto' } }, chips([['10.1.5.20', '10.1.5.20'], ['10.1.9.9', '10.1.9.9'], ['10.200.0.1', '10.200.0.1'], ['8.8.8.8', '8.8.8.8'], ['192.168.1.77', '192.168.1.77']], '', v => { inp.value = v; draw(); }))),
       tbl, res,
-      h('div', { class: 'row', style: { marginTop: '12px' } }, addNet, addVia, h('button', { class: 'btn sm', onclick: () => { if (N.parseCidr(addNet.value) && addVia.value) { routes.push({ net: addNet.value.trim(), via: addVia.value, note: 'Tumne add kiya' }); addNet.value = addVia.value = ''; draw(); } else Studio.toast('Valid CIDR aur next hop likho'); } }, '+ Route add karo')));
+      h('div', { class: 'row', style: { marginTop: '12px' } }, addNet, addVia, h('button', { class: 'btn sm', onclick: () => { if (N.parseCidr(addNet.value) && addVia.value) { routes.push({ net: addNet.value.trim(), via: addVia.value, note: 'Added by you' }); addNet.value = addVia.value = ''; draw(); } else Studio.toast('Enter a valid CIDR and a next hop'); } }, '+ Add route')));
     root.append(box);
     function draw() {
       tbl.innerHTML = res.innerHTML = '';
@@ -394,11 +383,11 @@
       const winIdx = m.length ? m[0].idx : -1;
       const matchSet = new Set(m.map(x => x.idx));
       const t = h('table', { class: 't' }, h('tr', null, ['Destination network', 'Next hop', 'Matches?', 'Note'].map(x => h('th', null, x))));
-      routes.forEach((r, k) => t.append(h('tr', { class: k === winIdx ? 'win' : (matchSet.has(k) ? 'hl' : '') }, h('td', { class: 'mono' }, r.net), h('td', null, r.via), h('td', null, k === winIdx ? '✅ WINNER' : (matchSet.has(k) ? 'match (kam specific)' : '—')), h('td', { class: 'muted' }, r.note))));
+      routes.forEach((r, k) => t.append(h('tr', { class: k === winIdx ? 'win' : (matchSet.has(k) ? 'hl' : '') }, h('td', { class: 'mono' }, r.net), h('td', null, r.via), h('td', null, k === winIdx ? '✅ WINNER' : (matchSet.has(k) ? 'matches (less specific)' : '-')), h('td', { class: 'muted' }, r.note))));
       tbl.append(t);
-      if (d === null) res.append(h('div', { class: 'status bad' }, 'Valid IP likho (jaise 10.1.5.20).'));
-      else if (winIdx < 0) res.append(h('div', { class: 'status bad' }, 'Koi route match nahi hua. Packet drop ho jayega ("Destination unreachable").'));
-      else res.append(h('div', { class: 'status ok' }, h('b', null, 'Router ka faisla: '), 'packet ' + routes[winIdx].via + ' ko bhejo, kyunki ' + routes[winIdx].net + ' sabse specific (lamba prefix /' + m[0].prefix + ') match hai.'));
+      if (d === null) res.append(h('div', { class: 'status bad' }, 'Enter a valid IP (like 10.1.5.20).'));
+      else if (winIdx < 0) res.append(h('div', { class: 'status bad' }, 'No route matches. The packet is dropped ("Destination unreachable").'));
+      else res.append(h('div', { class: 'status ok' }, h('b', null, 'Router decision: '), 'send the packet to ' + routes[winIdx].via + ', because ' + routes[winIdx].net + ' is the most specific match (longest prefix, /' + m[0].prefix + ').'));
     }
     inp.addEventListener('input', draw); draw();
   });
