@@ -1,0 +1,111 @@
+/* 90-day plan. Each day: [text, 'moduleId/stepIndex'] (link optional). */
+(function () {
+  'use strict';
+  const F = i => 'foundations/' + i, A = i => 'addressing/' + i, P = i => 'protocols/' + i, D = i => 'devices/' + i, T = i => 'tools/' + i, X = i => 'security/' + i;
+
+  Studio.plan = [
+    { title: 'Network ki neev', goal: 'Network kya hai, samajhna', days: [
+      ['Aapna ghar ka network khelke samjho. Diagram mein sab scenario try karo.', F(0)],
+      ['Devices network kaise bante hain: address, medium, switch, rules.', F(1)],
+      ['LAN, WAN, ISP aur gateway. Apne PC par ipconfig chalao.', F(2)],
+      ['Client aur server. 3 websites ke bare mein socho: kaun client, kaun server?', F(3)],
+      ['Website kholne ke kadam: DNS, TCP, HTTP.', F(4)],
+      ['Message layers mein kaise lipta hai (encapsulation).', F(5)],
+      ['Hafte ka revision: sabhi quiz dobara do aur notes banao.']] },
+    { title: 'Security ki nazar', goal: 'Foundations khatam, layers shuru', days: [
+      ['Har security role mein networking kyun zaroori.', F(6)],
+      ['Raaste mein kaun kya dekh sakta hai (HTTP vs HTTPS).', F(7)],
+      ['Troubleshooting game: "website nahi khul rahi".', F(8)],
+      ['OSI aur TCP/IP layers. Apne shabdon mein 7 layers likho.', A(0)],
+      ['MAC vs IP address. Apne PC ka MAC aur IP nikalo.', A(1)],
+      ['IPv4 aur binary. 10 IPs ko binary mein badlo.', A(2)],
+      ['Revision: Foundations aur Addressing ka ab tak ka quiz.']] },
+    { title: 'Subnetting', goal: 'Subnetting ko aadat banana', days: [
+      ['Public, private aur special IPs. Apne ghar ka IP kis range mein hai?', A(3)],
+      ['Subnet masks aur CIDR. Calculator mein 10 alag IP try karo.', A(4)],
+      ['Subnetting practice: 10 sawal bina calculator ke.', A(5)],
+      ['Subnetting practice: 15 sawal, galtiyan note karo.', A(5)],
+      ['Network ko chhote subnets mein todna (segmentation).', A(6)],
+      ['Ek chhote office ka subnet plan banao: HR, Servers, Guest.'],
+      ['Revision + subnetting ke 20 sawal ek saath.', A(5)]] },
+    { title: 'NAT, IPv6 aur ARP', goal: 'Addressing khatam, protocols shuru', days: [
+      ['NAT aur ports. Apne router mein NAT/DHCP page dekho.', A(7)],
+      ['IPv6 basics. Apne PC ka IPv6 address dekho.', A(8)],
+      ['Addressing module ka poora revision aur quiz.'],
+      ['ARP: IP se MAC. arp -a chalao aur table padho.', P(0)],
+      ['DHCP aur DORA. Apna lease kab tak ka hai dekho.', P(1)],
+      ['DNS ka safar: root se authoritative tak.', P(2)],
+      ['nslookup example.com chalao. Hafte ka revision.']] },
+    { title: 'DNS aur TCP', goal: 'DNS records, TCP handshake', days: [
+      ['DNS records: A, MX, TXT, CNAME.', P(3)],
+      ['3 domains ke MX aur TXT records nikalo (nslookup/dig).', T(2)],
+      ['TCP: handshake, flags aur sequence numbers.', P(4)],
+      ['TCP vs UDP. 5 apps ke baare mein likho kaun kya use karta hai.', P(5)],
+      ['Ports aur services: port game roz khelo.', P(6)],
+      ['Port game me 90% score lao. 25 common ports yaad karo.', P(6)],
+      ['Revision: protocols ka ab tak ka quiz.']] },
+    { title: 'Web protocols', goal: 'HTTP, TLS aur app protocols', days: [
+      ['HTTP request/response. Builder mein sab paths try karo.', P(7)],
+      ['curl -I aur curl -v se asli HTTP headers dekho.', T(6)],
+      ['HTTPS aur TLS handshake.', P(8)],
+      ['Browser mein ek site ka certificate kholke padho.'],
+      ['SSH, FTP, SMTP, SMB, RDP aur unki security.', P(9)],
+      ['Plain text vs encrypted protocols ki apni table banao.'],
+      ['Protocols module ka poora revision aur quiz.']] },
+    { title: 'Switching aur routing', goal: 'Devices kaise kaam karte hain', days: [
+      ['Hub, switch, router: farq samjho.', D(0)],
+      ['Switch MAC table kaise seekhta hai.', D(1)],
+      ['Routing table aur longest prefix match. Tool mein 10 destinations try karo.', D(2)],
+      ['Default gateway aur TTL. ip route / route print chalao.', D(3)],
+      ['VLANs: kyun aur kaise.', D(4)],
+      ['Topology builder mein ek chhota office banao aur ping karo.', D(5)],
+      ['Revision: routing aur switching ke 10 sawal.']] },
+    { title: 'Firewall, Wi-Fi, VPN', goal: 'Network ko surakshit karna', days: [
+      ['Firewall rules: first-match aur default deny.', D(6)],
+      ['Firewall tool mein 3 alag rule sets banao aur test karo.', D(6)],
+      ['Wi-Fi security: WEP se WPA3. Apne ghar ka Wi-Fi type check karo.', D(7)],
+      ['Router ka admin password aur firmware check karo.'],
+      ['VPN aur proxy ka fark.', D(8)],
+      ['Devices module ka revision aur quiz.'],
+      ['Mid-point test: 20 sawal alag-alag topics se.']] },
+    { title: 'ping, traceroute, DNS tools', goal: 'Troubleshooting tools', days: [
+      ['ping: andar se bahar troubleshooting ladder.', T(0)],
+      ['Apne PC par ping 127.0.0.1, gateway, 8.8.8.8, google.com chalao.', T(0)],
+      ['traceroute / tracert. Apne ISP ke hops gino.', T(1)],
+      ['nslookup aur dig ka cheat sheet.', T(2)],
+      ['Windows ya Linux par ipconfig/ip a, arp -a, netstat/ss chalao.', T(6)],
+      ['Mini lab: ek website ka poora raasta likho (DNS, IP, hops).'],
+      ['Hafte ka revision aur notes.']] },
+    { title: 'Wireshark', goal: 'Packets padhna', days: [
+      ['Wireshark kya hai aur capture reader tool.', T(3)],
+      ['Wireshark download karo aur apne network ka 30 second capture lo.', T(3)],
+      ['Filters: dns, tcp, http, ip.addr==...', T(3)],
+      ['Capture padhna: sawal, jawab, aur gayab jawab.', T(4)],
+      ['Ek TCP handshake apne capture mein dhoondho.', T(4)],
+      ['Follow TCP Stream: ek HTTP baat-cheet padho (apne lab mein).'],
+      ['Capture analysis ka chhota writeup likho.']] },
+    { title: 'nmap aur lab', goal: 'Scanning aur lab setup', days: [
+      ['nmap kaise kaam karta hai.', T(5)],
+      ['nmap simulator mein 3 hosts scan karo aur results samjho.', T(5)],
+      ['curl, netcat aur tcpdump ka cheat sheet.', T(6)],
+      ['Lab options dekho aur ek chuno (VM ya Packet Tracer).', T(7)],
+      ['VirtualBox ya Packet Tracer install karo.', T(7)],
+      ['Apne lab mein 2 VMs/devices ko jodo aur ping karo.'],
+      ['Apne lab par nmap chalao aur results likho.']] },
+    { title: 'Attacks aur defense', goal: 'Security ki nazar se', days: [
+      ['CIA triad aur attack surface.', X(0)],
+      ['ARP spoofing aur man-in-the-middle (defender ki nazar se).', X(1)],
+      ['DNS ke attacks aur unke signs.', X(2)],
+      ['Port scans aur recon ko log mein kaise pehchaane.', X(3)],
+      ['DoS/DDoS aur bachaav.', X(4)],
+      ['Defense in depth: apne ghar ke network ke liye plan banao.', X(5)],
+      ['Revision: security module ka quiz.']] },
+    { title: 'Capstone aur aage', goal: 'Sab kuch jodna', days: [
+      ['Logs padhna: shak wali lines dhoondho.', X(6)],
+      ['Capstone investigation: poori ghatna solve karo.', X(7)],
+      ['Capstone dobaara alag raaste se aur galat jawabon se seekho.', X(7)],
+      ['Aage ka roadmap: cert ya path chuno.', X(8)],
+      ['Poore course ka final revision aur sabhi quiz.'],
+      ['Apna portfolio: notes aur writeups ko GitHub par daalo.']] },
+  ];
+})();
